@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Rawatib
+GenericName=Payroll Manager
+Comment=Employee Attendance & Payroll Manager
+Exec=rawatib
+Icon=rawatib
+Terminal=false
+StartupNotify=true
+StartupWMClass=Rawatib
+Categories=Office;Finance;
+Keywords=payroll;salary;attendance;employees;wages;

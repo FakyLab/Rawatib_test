@@ -1,0 +1,82 @@
+#include <windows.h>
+
+IDI_ICON1 ICON "app_icon.ico"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+PRODUCTVERSION  @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       0x0L
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName",      "FakyLab\0"
+            VALUE "FileDescription",  "Rawatib - Employee Attendance & Payroll Manager\0"
+            VALUE "FileVersion",      "@PROJECT_VERSION@.0\0"
+            VALUE "InternalName",     "Rawatib\0"
+            VALUE "LegalCopyright",   "Copyright (C) @RAWATIB_BUILD_YEAR@ FakyLab. Open Source.\0"
+            VALUE "OriginalFilename", "Rawatib.exe\0"
+            VALUE "ProductName",      "Rawatib\0"
+            VALUE "ProductVersion",   "@PROJECT_VERSION@.0\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END
+
+// Manifest: declare as a proper desktop application.
+// - asInvoker:        no UAC elevation requested — not trying to gain privileges.
+// - supportedOS:      declares Win10/11 compatibility — marks this as a modern app.
+// - PerMonitorV2:     well-behaved DPI scaling — signal of a legitimate GUI app.
+// - Common-Controls:  standard themed widgets dependency.
+1 RT_MANIFEST
+BEGIN
+    "<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>\r\n"
+    "<assembly xmlns=""urn:schemas-microsoft-com:asm.v1"" manifestVersion=""1.0"">\r\n"
+    "  <assemblyIdentity\r\n"
+    "    version=""@PROJECT_VERSION@.0""\r\n"
+    "    processorArchitecture=""*""\r\n"
+    "    name=""FakyLab.Rawatib""\r\n"
+    "    type=""win32""/>\r\n"
+    "  <description>Rawatib Employee Attendance and Payroll Manager</description>\r\n"
+    "  <trustInfo xmlns=""urn:schemas-microsoft-com:asm.v3"">\r\n"
+    "    <security>\r\n"
+    "      <requestedPrivileges>\r\n"
+    "        <requestedExecutionLevel level=""asInvoker"" uiAccess=""false""/>\r\n"
+    "      </requestedPrivileges>\r\n"
+    "    </security>\r\n"
+    "  </trustInfo>\r\n"
+    "  <compatibility xmlns=""urn:schemas-microsoft-com:compatibility.v1"">\r\n"
+    "    <application>\r\n"
+    "      <supportedOS Id=""{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}""/>\r\n"
+    "      <supportedOS Id=""{1f676c76-80e1-4239-95bb-83d0f6d0da78}""/>\r\n"
+    "      <supportedOS Id=""{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}""/>\r\n"
+    "    </application>\r\n"
+    "  </compatibility>\r\n"
+    "  <application xmlns=""urn:schemas-microsoft-com:asm.v3"">\r\n"
+    "    <windowsSettings>\r\n"
+    "      <dpiAware xmlns=""http://schemas.microsoft.com/SMI/2005/WindowsSettings"">true/PM</dpiAware>\r\n"
+    "      <dpiAwareness xmlns=""http://schemas.microsoft.com/SMI/2016/WindowsSettings"">PerMonitorV2</dpiAwareness>\r\n"
+    "      <longPathAware xmlns=""http://schemas.microsoft.com/SMI/2016/WindowsSettings"">true</longPathAware>\r\n"
+    "    </windowsSettings>\r\n"
+    "  </application>\r\n"
+    "  <dependency>\r\n"
+    "    <dependentAssembly>\r\n"
+    "      <assemblyIdentity\r\n"
+    "        type=""win32""\r\n"
+    "        name=""Microsoft.Windows.Common-Controls""\r\n"
+    "        version=""6.0.0.0""\r\n"
+    "        processorArchitecture=""*""\r\n"
+    "        publicKeyToken=""6595b64144ccf1df""\r\n"
+    "        language=""*""/>\r\n"
+    "    </dependentAssembly>\r\n"
+    "  </dependency>\r\n"
+    "</assembly>\r\n"
+END

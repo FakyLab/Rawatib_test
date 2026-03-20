@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/app_icon.png</file>
+        <file>resources/LICENSE.txt</file>
+        <file>resources/THIRD_PARTY_LICENSES.txt</file>
+    </qresource>
+</RCC>

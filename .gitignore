@@ -1,0 +1,36 @@
+# Build artifacts
+build/
+*.o
+*.obj
+*.a
+*.lib
+*.exe
+*.dll
+*.so
+*.dylib
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.qm
+
+# Qt resource compiler output
+*.rcc
+
+# Qt Creator project files
+*.pro.user
+*.qbs.user
+*.creator.user
+
+# Qt binary translations from Qt installation — not committed to source
+# See translations/README.md for how to obtain and add qtbase_ar.qm
+translations/qtbase_ar.qm
+
+# IDE / OS artifacts
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
