@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Sql SqlPrivate)
+find_package(Qt6 REQUIRED COMPONENTS Core Sql)
 
 # ── Find OpenSSL (required by SQLCipher v4.6.1) ───────────────────────────
 find_package(OpenSSL REQUIRED)
@@ -90,11 +90,29 @@ target_include_directories(QSqlCipherDriverPlugin
         ${OPENSSL_INCLUDE_DIR}
 )
 
+# MSYS2, distro Qt packages, and aqt-installed Qt do not all expose a
+# Qt6SqlPrivateConfig.cmake package, but they still ship the private headers.
+# This driver only needs those headers, so we derive the include path from
+# the Qt installation layout instead of depending on a separate CMake package.
+if(DEFINED Qt6_VERSION)
+    set(QT_SQL_PRIVATE_INCLUDE_DIR "${Qt6_DIR}/../../../include/QtSql/${Qt6_VERSION}")
+    if(EXISTS "${QT_SQL_PRIVATE_INCLUDE_DIR}/QtSql/private/qsqlcachedresult_p.h")
+        target_include_directories(QSqlCipherDriverPlugin PRIVATE
+            "${QT_SQL_PRIVATE_INCLUDE_DIR}"
+        )
+    else()
+        message(FATAL_ERROR
+            "Qt Sql private headers were not found at:\n"
+            "  ${QT_SQL_PRIVATE_INCLUDE_DIR}\n"
+            "Expected:\n"
+            "  ${QT_SQL_PRIVATE_INCLUDE_DIR}/QtSql/private/qsqlcachedresult_p.h")
+    endif()
+endif()
+
 target_link_libraries(QSqlCipherDriverPlugin
     PRIVATE
         Qt6::Core
         Qt6::Sql
-        Qt6::SqlPrivate
         OpenSSL::Crypto
 )
 
