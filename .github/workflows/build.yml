@@ -31,7 +31,8 @@ jobs:
           target: 'desktop'
           arch: 'linux_gcc_64'
           cache: true
-          modules: 'qt5compat qtsvg qttools'
+          modules: 'qt5compat'
+          archives: 'qtbase qttools'
 
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
@@ -89,7 +90,8 @@ jobs:
           target: 'desktop'
           arch: 'clang_64'
           cache: true
-          modules: 'qt5compat qtsvg qttools'
+          modules: 'qt5compat'
+          archives: 'qtbase qttools'
 
       - name: Configure
         run: |
@@ -101,4 +103,3 @@ jobs:
 
       - name: Build
         run: cmake --build build --config Release
-

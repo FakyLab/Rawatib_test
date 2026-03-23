@@ -126,7 +126,8 @@ jobs:
           target: 'desktop'
           arch: 'linux_gcc_64'
           cache: true
-          modules: 'qt5compat qtsvg qttools'
+          modules: 'qt5compat'
+          archives: 'qtbase qttools'
 
       - name: Download linuxdeploy
         run: |
@@ -169,7 +170,8 @@ jobs:
           target: 'desktop'
           arch: 'clang_64'
           cache: true
-          modules: 'qt5compat qtsvg qttools'
+          modules: 'qt5compat'
+          archives: 'qtbase qttools'
 
       - name: Package
         run: |
@@ -244,4 +246,3 @@ jobs:
             artifacts/release-linux/*
             artifacts/release-macos/*
             artifacts/release-signing/*
-
