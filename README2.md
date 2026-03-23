@@ -6,7 +6,7 @@
 
 *Track attendance, calculate wages, and manage salary payments — all in one encrypted desktop app.*
 
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/FakyLab/Rawatib/releases/latest)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![Qt](https://img.shields.io/badge/Qt-6.x-green)
 ![License](https://img.shields.io/badge/license-GPLv3-orange)
 ![C++](https://img.shields.io/badge/C++-17-blue)
@@ -228,14 +228,12 @@ Three configurable deduction modes for monthly employees:
 
 ### Bundled (in `third_party/`)
 
-All of these are already included in the repository — no action needed.
-
-| Dependency | Notes |
+| Dependency | How to get |
 |---|---|
-| **SQLCipher** amalgamation | Pre-bundled. Only re-run `scripts/fetch_sqlcipher.sh` when upgrading. |
-| **qsqlcipher** Qt SQL driver | Pre-bundled. Only replace files when upgrading Qt. |
-| **qtkeychain** | Included as a Git submodule. |
-| **QXlsx** *(optional)* | Clone into `third_party/QXlsx/` to enable XLSX export — see [Optional: XLSX Export](#optional-xlsx-export). |
+| **SQLCipher** amalgamation | Run `scripts/fetch_sqlcipher.sh` (requires `tclsh` and `git`) |
+| **qsqlcipher** Qt SQL driver | Copy from Qt source — see [Third-Party Setup](#third-party-setup) |
+| **qtkeychain** | Git submodule — run `git submodule update --init --recursive` |
+| **QXlsx** *(optional)* | Clone into `third_party/QXlsx/` — see [Optional: XLSX Export](#optional-xlsx-export) |
 
 ### Platform-specific compilers
 
@@ -454,16 +452,15 @@ export QT_DIR=~/Qt/6.x.x/macos/lib/cmake/Qt6
 
 ## Third-Party Setup
 
-All dependencies are already bundled in the repository — no manual setup is required for a normal build. The sections below only apply if you need to **upgrade** a dependency to a newer version.
+Before the first build, three bundled dependencies need to be prepared:
 
-### Upgrading SQLCipher
-
-Update `SQLCIPHER_TAG` in `scripts/fetch_sqlcipher.sh`, then run it (requires `git` and `tclsh`):
+### 1 — SQLCipher amalgamation
 
 ```bash
 bash scripts/fetch_sqlcipher.sh
 ```
 
+Requires `git` and `tclsh`:
 ```bash
 # Ubuntu/Debian
 sudo apt install git tcl
@@ -475,7 +472,11 @@ brew install git tcl-tk
 pacman -S git tcl
 ```
 
-### Upgrading qsqlcipher
+This clones SQLCipher, generates the amalgamation (`sqlite3.c` + `sqlite3.h`), and places them in `third_party/sqlcipher/`. Only needs to run once unless you upgrade SQLCipher.
+
+---
+
+### 2 — qsqlcipher Qt SQL driver
 
 Copy these two files from your Qt source into `third_party/qsqlcipher/`:
 
@@ -484,11 +485,25 @@ Copy these two files from your Qt source into `third_party/qsqlcipher/`:
 | `$QTDIR/Src/qtbase/src/plugins/sqldrivers/sqlite/qsql_sqlite.cpp` | `third_party/qsqlcipher/qsql_sqlite.cpp` |
 | `$QTDIR/Src/qtbase/src/plugins/sqldrivers/sqlite/qsql_sqlite_p.h` | `third_party/qsqlcipher/qsql_sqlite_p.h` |
 
-### Upgrading qtkeychain
+On Windows with the Qt installer, the source is typically at:
+```
+C:\Qt\6.x.x\Src\qtbase\src\plugins\sqldrivers\sqlite\
+```
+
+On Linux with the `qt6-base-private-dev` package:
+```
+/usr/include/x86_64-linux-gnu/qt6/QtSql/private/
+```
+
+---
+
+### 3 — qtkeychain submodule
 
 ```bash
-git submodule update --remote third_party/qtkeychain
+git submodule update --init --recursive
 ```
+
+This clones qtkeychain into `third_party/qtkeychain/`. Required for storing the admin password key securely in the OS keychain (Windows Credential Manager, macOS Keychain, Linux Secret Service / kwallet).
 
 ---
 

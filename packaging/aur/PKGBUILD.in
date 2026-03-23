@@ -1,0 +1,26 @@
+pkgname=rawatib
+pkgver=@VERSION@
+pkgrel=1
+pkgdesc="Employee attendance and payroll manager"
+arch=('x86_64')
+url="https://github.com/@OWNER@/@REPO@"
+license=('GPL3')
+depends=('qt6-base' 'qt6-svg' 'openssl' 'libsecret')
+makedepends=('cmake' 'ninja' 'gcc' 'git' 'qt6-tools')
+source=("$pkgname-$pkgver-source.tar.gz::https://github.com/@OWNER@/@REPO@/releases/download/v$pkgver/$pkgname-$pkgver-source.tar.gz")
+sha256sums=('@SOURCE_SHA256@')
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  cmake -S . -B build \
+    -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr
+  cmake --build build
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+  DESTDIR="$pkgdir" cmake --install build
+}
+

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.fakylab.rawatib</id>
+  <name>Rawatib</name>
+  <summary>Employee attendance and payroll manager</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <developer id="com.fakylab">
+    <name>FakyLab</name>
+  </developer>
+  <update_contact>fakylab@proton.me</update_contact>
+  <launchable type="desktop-id">com.fakylab.rawatib.desktop</launchable>
+  <description>
+    <p>Rawatib is an offline-first desktop app for employee attendance, payroll, salary deductions, exports, and secure record keeping.</p>
+    <p>It stores data in an encrypted SQLCipher database and is designed to work especially well in Arabic and right-to-left environments while also supporting multiple additional UI languages.</p>
+  </description>
+  <categories>
+    <category>Office</category>
+    <category>Finance</category>
+  </categories>
+  <keywords>
+    <keyword>attendance</keyword>
+    <keyword>payroll</keyword>
+    <keyword>salary</keyword>
+    <keyword>employees</keyword>
+    <keyword>timesheet</keyword>
+  </keywords>
+  <url type="homepage">https://github.com/FakyLab/Rawatib</url>
+  <url type="bugtracker">https://github.com/FakyLab/Rawatib/issues</url>
+  <url type="vcs-browser">https://github.com/FakyLab/Rawatib</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/FakyLab/Rawatib/main/docs/screenshots/main_window.jpg</image>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/FakyLab/Rawatib/main/docs/screenshots/salary_summary.jpg</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="1.0.0" date="2026-03-20" />
+  </releases>
+  <provides>
+    <binary>rawatib</binary>
+  </provides>
+</component>

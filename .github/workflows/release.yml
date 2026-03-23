@@ -1,0 +1,239 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  MAINTAINER_EMAIL: fakylab@proton.me
+
+jobs:
+  source-and-aur:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Determine version
+        id: version
+        run: echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch SQLCipher
+        run: bash scripts/fetch_sqlcipher.sh
+
+      - name: Create release source tarball
+        run: |
+          mkdir -p dist/source dist/aur
+          tar \
+            --exclude-vcs \
+            --exclude='./build' \
+            --exclude='./dist' \
+            --exclude='./release' \
+            --transform "s,^\./,rawatib-${{ steps.version.outputs.value }}/," \
+            -czf "dist/source/rawatib-${{ steps.version.outputs.value }}-source.tar.gz" .
+
+      - name: Generate AUR metadata
+        run: |
+          owner_repo="$GITHUB_REPOSITORY"
+          owner="${owner_repo%%/*}"
+          repo="${owner_repo##*/}"
+          sha256="$(sha256sum "dist/source/rawatib-${{ steps.version.outputs.value }}-source.tar.gz" | awk '{print $1}')"
+          AUR_OUT_DIR=dist/aur bash scripts/generate-aur-metadata.sh \
+            "${{ steps.version.outputs.value }}" \
+            "$owner" \
+            "$repo" \
+            "$sha256"
+          tar -czf "dist/aur/rawatib-${{ steps.version.outputs.value }}-aur.tar.gz" -C dist/aur .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-source
+          path: |
+            dist/source/rawatib-${{ steps.version.outputs.value }}-source.tar.gz
+            dist/aur/PKGBUILD
+            dist/aur/.SRCINFO
+            dist/aur/rawatib-${{ steps.version.outputs.value }}-aur.tar.gz
+
+  windows:
+    runs-on: windows-2022
+    needs: source-and-aur
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            base-devel
+            git
+            tcl
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-openssl
+            mingw-w64-ucrt-x86_64-qt6-base
+            mingw-w64-ucrt-x86_64-qt6-base-private
+            mingw-w64-ucrt-x86_64-qt6-svg
+            mingw-w64-ucrt-x86_64-qt6-tools
+            mingw-w64-ucrt-x86_64-nsis
+
+      - name: Fetch SQLCipher
+        run: bash scripts/fetch_sqlcipher.sh
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$MINGW_PREFIX"
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Package
+        shell: powershell
+        run: .\scripts\package-windows.ps1 -Version "${{ needs.source-and-aur.outputs.version }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          path: dist/windows/*
+
+  linux:
+    runs-on: ubuntu-24.04
+    needs: source-and-aur
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake ninja-build pkg-config git tcl curl file \
+            desktop-file-utils appstream patchelf dpkg-dev fakeroot gnupg \
+            qt6-base-dev qt6-base-private-dev qt6-tools-dev qt6-tools-dev-tools \
+            libqt6svg6-dev libssl-dev
+
+      - name: Fetch SQLCipher
+        run: bash scripts/fetch_sqlcipher.sh
+
+      - name: Download linuxdeploy
+        run: |
+          mkdir -p dist/linux
+          curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -o dist/linux/linuxdeploy-x86_64.AppImage
+          curl -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage -o dist/linux/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x dist/linux/linuxdeploy-x86_64.AppImage dist/linux/linuxdeploy-plugin-qt-x86_64.AppImage
+
+      - name: Package
+        run: |
+          export VERSION="${{ needs.source-and-aur.outputs.version }}"
+          export LINUXDEPLOY="$PWD/dist/linux/linuxdeploy-x86_64.AppImage"
+          export LINUXDEPLOY_QT_PLUGIN="$PWD/dist/linux/linuxdeploy-plugin-qt-x86_64.AppImage"
+          bash scripts/package-linux.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-linux
+          path: |
+            dist/linux/*.AppImage
+            dist/linux/*.deb
+
+  macos:
+    runs-on: macos-14
+    needs: source-and-aur
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: brew install ninja qt@6 openssl tcl-tk
+
+      - name: Fetch SQLCipher
+        run: bash scripts/fetch_sqlcipher.sh
+
+      - name: Package
+        run: |
+          export VERSION="${{ needs.source-and-aur.outputs.version }}"
+          export QT_DIR="$(brew --prefix qt@6)"
+          export OPENSSL_ROOT_DIR="$(brew --prefix openssl)"
+          export PATH="$(brew --prefix qt@6)/bin:$PATH"
+          bash scripts/package-macos.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-macos
+          path: dist/macos/*.dmg
+
+  checksums-and-signatures:
+    runs-on: ubuntu-24.04
+    needs:
+      - source-and-aur
+      - windows
+      - linux
+      - macos
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Flatten artifacts
+        run: |
+          mkdir -p dist/signing
+          find artifacts -type f -exec cp {} dist/signing/ \;
+
+      - name: Generate SHA256SUMS
+        run: |
+          cd dist/signing
+          sha256sum * > SHA256SUMS
+
+      - name: Import GPG key
+        if: ${{ secrets.FAKYLAB_GPG_PRIVATE_KEY != '' }}
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.FAKYLAB_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.FAKYLAB_GPG_PASSPHRASE }}
+        run: |
+          export GNUPGHOME="$(mktemp -d)"
+          printf '%s' "$GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
+          gpg --batch --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" \
+            --armor --detach-sign --output dist/signing/SHA256SUMS.asc dist/signing/SHA256SUMS
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-signing
+          path: dist/signing/SHA256SUMS*
+
+  publish:
+    runs-on: ubuntu-24.04
+    needs:
+      - source-and-aur
+      - windows
+      - linux
+      - macos
+      - checksums-and-signatures
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/release-source/*
+            artifacts/release-windows/*
+            artifacts/release-linux/*
+            artifacts/release-macos/*
+            artifacts/release-signing/*

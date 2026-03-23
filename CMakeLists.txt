@@ -368,6 +368,13 @@ set_target_properties(Rawatib PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
 )
 
+# Linux packages should install a lowercase binary that matches the desktop file.
+if(UNIX AND NOT APPLE)
+    set_target_properties(Rawatib PROPERTIES
+        OUTPUT_NAME "rawatib"
+    )
+endif()
+
 # ── Windows: windeployqt ───────────────────────────────────────────────────
 # Copies the Qt DLLs and plugins needed to run Rawatib.exe next to it.
 # Only runs in Release builds to avoid cluttering Debug output.
@@ -437,5 +444,32 @@ if(UNIX AND NOT APPLE)
     )
     install(FILES resources/rawatib.desktop
         DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
+        RENAME com.fakylab.rawatib.desktop
+    )
+    install(FILES packaging/linux/com.fakylab.rawatib.metainfo.xml
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo
+    )
+    install(FILES resources/LICENSE.txt resources/THIRD_PARTY_LICENSES.txt
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/rawatib
     )
 endif()
+
+# Debian packaging metadata via CPack.
+set(CPACK_PACKAGE_NAME "rawatib")
+set(CPACK_PACKAGE_VENDOR "FakyLab")
+set(CPACK_PACKAGE_CONTACT "fakylab@proton.me")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Employee Attendance & Payroll Manager")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/resources/LICENSE.txt")
+set(CPACK_PACKAGE_FILE_NAME "rawatib-${PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}")
+
+if(UNIX AND NOT APPLE)
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+    set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
+    set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+endif()
+
+include(CPack)
+

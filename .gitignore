@@ -1,5 +1,9 @@
 # Build artifacts
 build/
+dist/
+dist/gpg/
+dist/gpg/*
+!dist/gpg/.gitkeep
 *.o
 *.obj
 *.a
@@ -34,3 +38,4 @@ translations/qtbase_ar.qm
 *.swp
 .DS_Store
 Thumbs.db
+

@@ -1,0 +1,21 @@
+pkgbase = rawatib
+	pkgdesc = Employee attendance and payroll manager
+	pkgver = @VERSION@
+	pkgrel = 1
+	url = https://github.com/@OWNER@/@REPO@
+	arch = x86_64
+	license = GPL3
+	makedepends = cmake
+	makedepends = ninja
+	makedepends = gcc
+	makedepends = git
+	makedepends = qt6-tools
+	depends = qt6-base
+	depends = qt6-svg
+	depends = openssl
+	depends = libsecret
+	source = rawatib-@VERSION@-source.tar.gz::https://github.com/@OWNER@/@REPO@/releases/download/v@VERSION@/rawatib-@VERSION@-source.tar.gz
+	sha256sums = @SOURCE_SHA256@
+
+pkgname = rawatib
+
