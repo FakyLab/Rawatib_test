@@ -21,21 +21,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential cmake ninja-build pkg-config git tcl autoconf automake libtool \
-            libgl1-mesa-dev libxkbcommon-dev libssl-dev
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.8.3'
-          host: 'linux'
-          target: 'desktop'
-          arch: 'linux_gcc_64'
-          cache: true
-          modules: 'qt5compat'
-          archives: 'qtbase qttools'
+            libgl1-mesa-dev libxkbcommon-dev libssl-dev \
+            qt6-base-dev qt6-base-private-dev qt6-tools-dev qt6-tools-dev-tools libqt6svg6-dev
 
       - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         run: cmake --build build --config Release
@@ -80,25 +70,15 @@ jobs:
           submodules: recursive
 
       - name: Install system dependencies
-        run: brew install ninja openssl tcl-tk
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.8.3'
-          host: 'mac'
-          target: 'desktop'
-          arch: 'clang_64'
-          cache: true
-          modules: 'qt5compat'
-          archives: 'qtbase qttools'
+        run: brew install ninja qt@6 openssl tcl-tk
 
       - name: Configure
         run: |
+          export QT_DIR="$(brew --prefix qt@6)"
           export OPENSSL_ROOT_DIR="$(brew --prefix openssl)"
           cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
+            -DCMAKE_PREFIX_PATH="$QT_DIR" \
             -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT_DIR"
 
       - name: Build

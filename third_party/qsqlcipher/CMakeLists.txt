@@ -95,17 +95,33 @@ target_include_directories(QSqlCipherDriverPlugin
 # This driver only needs those headers, so we derive the include path from
 # the Qt installation layout instead of depending on a separate CMake package.
 if(DEFINED Qt6_VERSION)
-    set(QT_SQL_PRIVATE_INCLUDE_DIR "${Qt6_DIR}/../../../include/QtSql/${Qt6_VERSION}")
-    if(EXISTS "${QT_SQL_PRIVATE_INCLUDE_DIR}/QtSql/private/qsqlcachedresult_p.h")
+    get_filename_component(_qt_cmake_root "${Qt6_DIR}" ABSOLUTE)
+    set(_qt_sql_private_candidates
+        "${_qt_cmake_root}/../../../include/QtSql/${Qt6_VERSION}"
+        "${_qt_cmake_root}/../../../include/qt6/QtSql/${Qt6_VERSION}"
+        "${_qt_cmake_root}/../../include/QtSql/${Qt6_VERSION}"
+        "${_qt_cmake_root}/../../include/qt6/QtSql/${Qt6_VERSION}"
+    )
+
+    set(QT_SQL_PRIVATE_INCLUDE_DIR "")
+    foreach(_candidate IN LISTS _qt_sql_private_candidates)
+        if(EXISTS "${_candidate}/QtSql/private/qsqlcachedresult_p.h")
+            set(QT_SQL_PRIVATE_INCLUDE_DIR "${_candidate}")
+            break()
+        endif()
+    endforeach()
+
+    if(QT_SQL_PRIVATE_INCLUDE_DIR)
         target_include_directories(QSqlCipherDriverPlugin PRIVATE
             "${QT_SQL_PRIVATE_INCLUDE_DIR}"
         )
     else()
+        string(JOIN "\n  " _candidate_list ${_qt_sql_private_candidates})
         message(FATAL_ERROR
-            "Qt Sql private headers were not found at:\n"
-            "  ${QT_SQL_PRIVATE_INCLUDE_DIR}\n"
-            "Expected:\n"
-            "  ${QT_SQL_PRIVATE_INCLUDE_DIR}/QtSql/private/qsqlcachedresult_p.h")
+            "Qt Sql private headers were not found. Looked in:\n"
+            "  ${_candidate_list}\n"
+            "Expected file:\n"
+            "  <candidate>/QtSql/private/qsqlcachedresult_p.h")
     endif()
 endif()
 
