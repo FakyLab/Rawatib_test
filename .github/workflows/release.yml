@@ -83,7 +83,6 @@ jobs:
             mingw-w64-ucrt-x86_64-ninja
             mingw-w64-ucrt-x86_64-openssl
             mingw-w64-ucrt-x86_64-qt6-base
-            mingw-w64-ucrt-x86_64-qt6-base-private
             mingw-w64-ucrt-x86_64-qt6-svg
             mingw-w64-ucrt-x86_64-qt6-tools
             mingw-w64-ucrt-x86_64-nsis
@@ -111,14 +110,23 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             build-essential cmake ninja-build pkg-config git tcl curl file autoconf automake libtool \
             desktop-file-utils appstream patchelf dpkg-dev fakeroot gnupg \
-            qt6-base-dev qt6-base-private-dev qt6-tools-dev qt6-tools-dev-tools \
-            libqt6svg6-dev libssl-dev
+            libgl1-mesa-dev libxkbcommon-dev libssl-dev
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          host: 'linux'
+          target: 'desktop'
+          arch: 'linux_gcc_64'
+          cache: true
+          modules: 'qt5compat qtsvg qttools'
 
       - name: Download linuxdeploy
         run: |
@@ -130,6 +138,7 @@ jobs:
       - name: Package
         run: |
           export VERSION="${{ needs.source-and-aur.outputs.version }}"
+          export QT_DIR="$QT_ROOT_DIR"
           export LINUXDEPLOY="$PWD/dist/linux/linuxdeploy-x86_64.AppImage"
           export LINUXDEPLOY_QT_PLUGIN="$PWD/dist/linux/linuxdeploy-plugin-qt-x86_64.AppImage"
           bash scripts/package-linux.sh
@@ -149,15 +158,25 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install dependencies
-        run: brew install ninja qt@6 openssl tcl-tk
+      - name: Install system dependencies
+        run: brew install ninja openssl tcl-tk
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          host: 'mac'
+          target: 'desktop'
+          arch: 'clang_64'
+          cache: true
+          modules: 'qt5compat qtsvg qttools'
 
       - name: Package
         run: |
           export VERSION="${{ needs.source-and-aur.outputs.version }}"
-          export QT_DIR="$(brew --prefix qt@6)"
+          export QT_DIR="$QT_ROOT_DIR"
           export OPENSSL_ROOT_DIR="$(brew --prefix openssl)"
-          export PATH="$(brew --prefix qt@6)/bin:$PATH"
+          export PATH="$QT_ROOT_DIR/bin:$PATH"
           bash scripts/package-macos.sh
 
       - uses: actions/upload-artifact@v4
@@ -225,3 +244,4 @@ jobs:
             artifacts/release-linux/*
             artifacts/release-macos/*
             artifacts/release-signing/*
+
