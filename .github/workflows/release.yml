@@ -26,9 +26,6 @@ jobs:
         id: version
         run: echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
-      - name: Fetch SQLCipher
-        run: bash scripts/fetch_sqlcipher.sh
-
       - name: Create release source tarball
         run: |
           mkdir -p dist/source dist/aur
@@ -91,9 +88,6 @@ jobs:
             mingw-w64-ucrt-x86_64-qt6-tools
             mingw-w64-ucrt-x86_64-nsis
 
-      - name: Fetch SQLCipher
-        run: bash scripts/fetch_sqlcipher.sh
-
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$MINGW_PREFIX"
 
@@ -121,13 +115,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential cmake ninja-build pkg-config git tcl curl file \
+            build-essential cmake ninja-build pkg-config git tcl curl file autoconf automake libtool \
             desktop-file-utils appstream patchelf dpkg-dev fakeroot gnupg \
             qt6-base-dev qt6-base-private-dev qt6-tools-dev qt6-tools-dev-tools \
             libqt6svg6-dev libssl-dev
-
-      - name: Fetch SQLCipher
-        run: bash scripts/fetch_sqlcipher.sh
 
       - name: Download linuxdeploy
         run: |
@@ -160,9 +151,6 @@ jobs:
 
       - name: Install dependencies
         run: brew install ninja qt@6 openssl tcl-tk
-
-      - name: Fetch SQLCipher
-        run: bash scripts/fetch_sqlcipher.sh
 
       - name: Package
         run: |

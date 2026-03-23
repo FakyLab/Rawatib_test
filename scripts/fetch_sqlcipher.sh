@@ -28,6 +28,11 @@ if ! command -v git &>/dev/null; then
     exit 1
 fi
 
+if ! command -v make &>/dev/null; then
+    echo "ERROR: make not found."
+    exit 1
+fi
+
 mkdir -p "$OUTDIR"
 mkdir -p "$TMPDIR_BASE"
 
@@ -38,17 +43,35 @@ git clone --depth=1 --branch "$SQLCIPHER_TAG" \
 
 cd "$TMPDIR_BASE/sqlcipher"
 
+if [[ ! -x ./configure ]]; then
+    echo "No configure script found. Bootstrapping with autoreconf..."
+    if ! command -v autoreconf &>/dev/null; then
+        echo "ERROR: autoreconf not found."
+        echo "  Ubuntu/Debian: sudo apt install autoconf automake libtool"
+        echo "  macOS:         brew install autoconf automake libtool"
+        echo "  Windows/MSYS2: pacman -S autoconf automake libtool"
+        exit 1
+    fi
+    autoreconf -fi
+fi
+
 echo "Configuring ..."
-./configure \
+if ! ./configure \
     --enable-tempstore=yes \
     CFLAGS="-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL" \
     LDFLAGS="-lcrypto" \
     --disable-shared \
     --enable-static \
-    > /dev/null 2>&1
+; then
+    echo "ERROR: SQLCipher configure failed." >&2
+    exit 1
+fi
 
 echo "Generating amalgamation ..."
-make sqlite3.c > /dev/null 2>&1
+if ! make sqlite3.c; then
+    echo "ERROR: SQLCipher amalgamation build failed." >&2
+    exit 1
+fi
 
 echo "Copying files ..."
 cp sqlite3.c  "$OUTDIR/sqlite3.c"

@@ -20,12 +20,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential cmake ninja-build pkg-config git tcl \
+            build-essential cmake ninja-build pkg-config git tcl autoconf automake libtool \
             qt6-base-dev qt6-base-private-dev qt6-tools-dev qt6-tools-dev-tools \
             libqt6svg6-dev libssl-dev
-
-      - name: Fetch SQLCipher
-        run: bash scripts/fetch_sqlcipher.sh
 
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
@@ -60,9 +57,6 @@ jobs:
             mingw-w64-ucrt-x86_64-qt6-svg
             mingw-w64-ucrt-x86_64-qt6-tools
 
-      - name: Fetch SQLCipher
-        run: bash scripts/fetch_sqlcipher.sh
-
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$MINGW_PREFIX"
 
@@ -80,9 +74,6 @@ jobs:
         run: |
           brew install ninja qt@6 openssl tcl-tk
 
-      - name: Fetch SQLCipher
-        run: bash scripts/fetch_sqlcipher.sh
-
       - name: Configure
         run: |
           export QT_DIR="$(brew --prefix qt@6)"
@@ -94,4 +85,3 @@ jobs:
 
       - name: Build
         run: cmake --build build --config Release
-
